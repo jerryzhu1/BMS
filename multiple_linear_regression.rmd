@@ -1,0 +1,167 @@
+# Multiple Linear Regression
+
+在简[单线性回归](simple_linear_regression.html)中，我们使用花萼长度来预测花瓣长度，在iris数据集里，还有花萼宽度、花瓣宽度的数据，如果我们想探索花萼宽度和花瓣宽度与花瓣长度的关系，可以分别做简单线性回归，这样子每一个简单线性回归，都忽略了其它两个因素的影响。事实上，一个现象常常与多个因素相联系，由多个变量组合共同来预测因变量，会更加有效。
+
+多元线性回归模型和简单线性回归一样，每个变量需要一个斜率参数：
+$$ Y = \beta_0 + \beta_1 X_1 + \beta_2 X_2 + \cdot\cdot\cdot + \beta_p X_p + \epsilon $$
+
+假设这里有p个变量， $X_j$ 代表第j个变量， $\beta_j$ 代表 $X_j$ 每升高一个单位对Y的平均影响。
+
+真实的参数是未知的，我们需要估计 $\hat{\beta}_0,\hat{\beta}_1,...,\hat{\beta}_p$ 来估计回归参数 $\beta_0,\beta_1,...,\beta_p$ ，于是回归模型就变成：
+
+$$ \hat{y} = \hat{\beta}_0 + \hat{\beta}_1 x_1 + \hat{\beta}_2 x_2 + \cdot\cdot\cdot + \hat{\beta}_p x_p$$
+
+参数估计依然使用最小二乘法，找出参数 $\hat{\beta}_0,\hat{\beta}_1,...,\hat{\beta}_p$ 使得RSS最小。
+$$ RSS= \sum_{i=1}^n (y_i - \hat{y}_i)^2 \\
+= \sum_{i=1}^n (y_i - \hat{\beta}_0 - \hat{\beta}_1 x_1 - \hat{\beta}_2 x_2 - \cdot\cdot\cdot - \hat{\beta}_p x_p)^2 $$
+
+从数值计算上看，这是个优化问题，使用矩阵运算还是比较容易的，[具体请戳这里](http://ygc.name/2011/03/29/machine-learning-ex3-multivariate-linear-regression/)。
+
+在R里，依然可以使用lm函数来做多元线性回归：
+```{r}
+data(iris)
+lm.fit <- lm(Petal.Length ~ Petal.Width+Sepal.Length+Sepal.Width, data=iris)
+lm.fit
+```
+
+## 相关问题
+进行多元线性回归，我们需要回答以下一些重要的问题：
++ X和Y是否存在关系?
++ 所有自变量都有助于解释Y吗？或者说是否只有一部分自变量对Y的预测是有用的？
++ 模型对数据的拟合有多好？
++ 预测的准确性有多好？
+
+### X和Y是否存在关系?
+对于这个问题，可以使用在[简单线性回归](simple_linear_regression.html)中提到的RSE和 $R^2$ 来评估。
+```{r}
+## TSS
+tss <- with(iris, sum((Petal.Length - mean(Petal.Length))^2))
+```
+```
+## if calculate prediction values manually, use the following command:
+## b <- lm.fit$coefficients
+## iris$"(Intercept)" <- 1
+## d <- as.matrix(iris[, names(b)])
+## iris$fitted <- d %*% as.matrix(b, ncol=1)
+```
+```{r}
+## RSS
+iris$fitted <- predict(lm.fit)
+rss <- with(iris, sum((fitted-Petal.Length)^2))
+b <- lm.fit$coefficients
+p <- length(b) - 1
+n <- nrow(iris)
+df <- n - p -1
+
+## RSE
+rse <- sqrt( rss/df )
+print(rse)
+## R-squared
+rr <- 1 - rss/tss
+print(rr)
+```
+ $R^2$ 是很高的，证明X和Y确实是存在关系的。
+另一方面，可以做统计检验，如果X和Y没有关系，那么参数 $\beta_1 = \beta_2 = \cdot\cdot\cdot = \beta_p = 0$ ，我们可以检验零假设：
+$$ H_{0}: \beta_1 = \beta_2 =... = \beta_p = 0$$
+$$H_{a}: at\; least\; one\; \beta_j\; is\; non-zero.$$
+
+这个假设检验通过计算F统计量：
+$$ F = \frac{(TSS-RSS)/p}{RSS/(n-p-1)}$$
+
+其中 $TSS=\sum(y_i - \bar{y})^2$ 而 $RSS=\sum(y_i - \hat{y}_i)^2$ ，如果线性模型是正确的，那么：
+$$E\{RSS/(n-p-1)\} = \sigma^2$$
+如果 $H_0$ 是对的，则
+$$E\{(TSS - RSS)/p\} = \sigma^2$$
+
+因此如果 $H_0$ 是对的，那么F统计量的值因为接近于1，如果 $H_a$ 是对的，则 $E\{(TSS - RSS)/p\} > \sigma^2$ ，F统计量要大于1。
+
+```{r}
+## F-statistic
+fstat <- ((tss-rss)/p) / (rss/df)
+print(fstat)
+```
+F统计量服从F分布，可以根据F分布来计算p值，以决定是否reject  $H_0$ 。
+```{r}
+pf(fstat, p, n-p-1, lower.tail=F)
+```
+
+上面计算的这些统计量，lm函数都有计算。
+```{r}
+summary(lm.fit)
+```
+而且还对每个变量计算了p值，这些p值给出了每一个 $x_j$ 和y是否相关的信息。
+
+
+### 变量选择
+通过上面输出中每个参数的p值，可以看出每个变量对y的贡献是不一样的，很多情况下，y只和其中某一部分 $x_j$ 有关，这就涉及到变量选择问题。
+
+针对这个问题有三种方法：
++ Forward selection：从空模型（只包含截距）开始，对p个变量分别做简单线性回归，对产生最小RSS的变量加入到模型中，继而做两变量拟合，把产生最小RSS的第二个变量，再加入到模型中，不断迭代直到停止条件产生。
++ Backward selection：所有变量一起拟合，然后移除p值最大的变量，再对(p-1)个变量重新拟合，再移除最大p值的变量，不断迭代，直到停止条件出现。
++ Mixed selection：这是Forward和Backward selection的组合，从空模型开始，按照Forward selection来做，变量一个个地加入，在这个过程中，某些变量的p值是有可能升高的，如果p值高于某个阈值，移除这个变量。不断地进行forward和backward步骤，直到模型中的所有变量p值都足够小，而模型外的变量，如果加入到模型中，会产生比较大的p值。
+
+Backward selection不能应用于 p > n的情况下，而Forward selection则可以，Forward selection是贪婪方法，开始加入的变量到了后面可能变成冗余，而Mixed selection可以弥补这一点。
+
+### 模型拟合
+模型对数据的拟合度有多好，可以使用之前计算过的RSE和 $R^2$ 来评估。
+[简单线性回归](simple_linear_regression.html)给出的RSE公式，是针对简单线性回归的简化形式，其通过形式为：
+$$ RSE = \sqrt{\frac{RSS}{n-p-1}} $$
+
+在简单线性回归中 $R^2$ 是X和Y的相关系数的平方，在多元线性回归中，它等于Y和 $\hat(Y)$ 的相关系数的平方。事实上拟合后的模型，除了RSS最小之外， $R^2$ 是最大的。
+```{r}
+with(iris, cor(fitted, Petal.Length)^2)
+```
+按相关系数计算的 $R^2$ 和之前使用 $1 - \frac{RSS}{TSS}$ 计算的是一样的。
+
+### 模型预测
+参数预测本身是有误差的，即使我们知道真实的参数，也不可能完美地预测数据，因为模型中包含有随机误差 $\epsilon$ ，在预测的时候，最好使用置信区间，这样把uncertainty的信息也包括在内。
+
+```{r}
+xx <- predict(lm.fit, se.fit=TRUE, interval="confidence", level=0.95)
+xx <- as.data.frame(xx$fit)
+xx$y <- iris$Petal.Length
+head(xx)
+mean(with(xx, y> lwr & y < upr))
+```
+这个模型的 $R^2$ 是0.968，拟合得如此好的模型，预测起来，偏差还是有那么些，真实值落在预测的95%置信区间里，只占了35%不到。
+```{r}
+yy <- predict(lm.fit, se.fit=TRUE, interval="prediction", level=0.95)$fit
+colnames(yy) <- c("fitpred", "lwrpred", "uprpred")
+xx <- cbind(xx, yy)
+head(xx)
+mean(with(xx, y> lwrpred & y < uprpred))
+```
+显然用prediction方法，给出的预测值置信区间要靠谱得多。
+```{r mlm.fig1, fig.width=6, fig.height=6}
+ggplot(xx, aes(fit, y))+geom_point() + geom_line(aes(y=fit)) + geom_line(aes(y=lwr), color="red") +  geom_line(aes(y=upr), color="red") +  geom_line(aes(y=lwrpred), color="blue") +  geom_line(aes(y=uprpred), color="blue")
+```
+
+## 数值运算
+参考[以前的博文](http://ygc.name/2011/03/29/machine-learning-ex3-multivariate-linear-regression/)
+$$ B = (X^TX)^{-1}(X^TY)$$
+
+```{r}
+X=iris[,c("Petal.Width", "Sepal.Length", "Sepal.Width")]
+X=as.matrix(X)
+X=cbind(x0=1, X)
+Y=as.matrix(iris[, "Petal.Length"])
+solve(t(X) %*% X) %*% t(X) %*% Y
+lm.fit
+```
+按照公式计算出来，和lm.fit的结果是一样的。
+
+
+
+```
+2013-06-18
+```
+
+## 欢迎请作者一杯咖啡
+<p><a href="https://me.alipay.com/gcyu"><img src="https://img.alipay.com/sys/personalprod/style/mc/btn-index.png" alt="捐赠EventProxy"></a></p>
+
+## 访问统计
+  <a href="http://www.digits.com" target="_blank">
+    <img src="http://counter.digits.com/?counter={1bb4e1b1-f35f-dd34-31dc-5a118f10bdb1}&template=simplehits&foreground=0B77CF&background=FFFFFF" 
+     alt="Hit Counter by Digits" border="0"  />
+  </a>
+

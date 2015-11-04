@@ -1,0 +1,63 @@
+# 线性回归
+## Author: Guangchuang Yu 
+
+向量 $X^T = c(X_1, X_2,…, X_p)$ 是输入数据，线性回归模型由以下公式给出：
+$$ f(X) = \beta_0 + \sum_{j=1}^p X_j \beta_j$$
+
+通常我们有训练集$(x_1, y_1)...(x_N, y_N)$ 来估计参数 $\beta$ ，每一个 $x_i = (x_{i1}, x_{i2},...,x_{ip})^T$ 是第i个数据。
+通过使用least squares通过最小化RSS来估计参数 $\beta=(\beta_0, \beta_1, ..., \beta_p)^T$
+
+$$RSS(\beta) = \sum_{i=1}^N(y_i-f(x_i))^2 $$
+
+我们可以令 $x_{i0}=1$ ， 这样训练集就是N x (p+1)的矩阵，而f(X)也可以简单地写成 $f(X) = X\beta$ 。
+
+## Gradient descent
+
++ 随机对 $\beta$ 赋值
++ 更新 $\beta$ 的值，使得 $RSS(\beta)$ 按照梯度下降的方向减少
++ 重复上面步骤，直至收敛
+
+对 $RSS(\beta)$ 求偏导：
+$$\frac{\partial}{\partial \beta}RSS(\beta) = -2 X^T (y-X\beta)$$
+第二步更新 $\beta$ 的值，就可以表示为：
+$$\beta = \beta - \alpha \frac{\partial}{\partial \beta_j}RSS(\beta)$$
+
+好比要下山，以那个方向下最快，这由偏导给出；而 $\alpha$ 则表示步长，值大了，可能overshoot，导致难以收敛，而值太小，则会导致迭代次数多。
+
+```{r regression.fig1, fig.width=6, fig.height=6}
+## Gradient descent algorithm
+gradDescent <- function(X, y, beta, alpha, eps=1e-10) {
+    m <- length(y)
+    repeat {
+        h <- X %*% beta
+        ## derivative of cost J.
+        dJ <- -2 * t(X) %*% (y-h)
+        step <- alpha * dJ/m
+        beta <- beta - step
+        if ( all(step < eps) )
+        	break 
+    }
+    return(beta)
+}
+require(mlass)
+data(ex1data1)
+x <- cbind(1, X)
+head(x)
+head(y)
+beta <- matrix(0, nrow=2, ncol=1)
+beta <- gradDescent(x, y, beta, alpha=0.005)
+beta
+require(ggplot2)
+d <- data.frame(x=X, y=y)
+p <- ggplot(d, aes(x, y))+geom_point()
+p+geom_abline(intercept=beta[1,1], slope=beta[2,1])
+```
+
+## 欢迎请作者一杯咖啡
+<p><a href="https://me.alipay.com/gcyu"><img src="https://img.alipay.com/sys/personalprod/style/mc/btn-index.png" alt="捐赠EventProxy"></a></p>
+
+## 访问统计
+  <a href="http://www.digits.com" target="_blank">
+    <img src="http://counter.digits.com/?counter={1bb4e1b1-f35f-dd34-31dc-5a118f10bdb1}&template=simplehits&foreground=0B77CF&background=FFFFFF" 
+     alt="Hit Counter by Digits" border="0"  />
+  </a>

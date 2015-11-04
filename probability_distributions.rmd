@@ -1,0 +1,135 @@
+# Probability Distributions
+
+## 均值与方差
+所有离散分布的均值和方差都可以用以下公式计算：
+$$\mu=\sum[xP(x)]$$
+$$\sigma^2=\sum[(x-\mu)^2P(x)]$$
+
+## 二项式分布
+二项式分布非常简单，形象点说白球和黑球有放回抽样。
+
+$$ P(X=r) = {n \choose r} p^r (1-p)^{n-r}$$
+
+二项式分布的均值：
+$$ \mu = np $$
+方差：
+$$ \sigma^2 = np(1-p)$$
+
+n越大，二项式分布越接近于正态分布：
+```{r pd.fig1, width=6, height=6}
+bnd <- function(n, p=0.5) {
+	x <- seq(0, n)
+	prob <- dbinom(x, n, p)
+	df <- data.frame(x=x, prob=prob, n=n)
+	return(df)
+}
+require(plyr)
+bn.df <- mdply(data.frame(n=seq(10,30, 5)), bnd)
+ggplot(bn.df, aes(x, prob, group=n, color=factor(n)))+geom_point(shape=1)+geom_line()
+```
+
+
+## Poisson分布
+[Poisson分布是二项式分布的极限形式](http://episte.math.ntu.edu.tw/articles/sm/sm_16_07_1/),用于描述单位时间或空间里随机事件发生的次数，参数 $\mu$ 表示单位时间或空间里某事件平均发生的次数。
+
+$$P(X=x) = \frac{e^{-\lambda}\lambda^x}{x!}$$
+
+Poisson分布的均值和方差相等： $\mu = \sigma^2 = \lambda$ .
+
+Poisson分布是右偏分布，均值越大时，其对称性越好：
+```{r pd.fig2, width=6, height=6}
+pd <- function(x=100, lambda) {
+	x <- seq(0, x)
+	prob <- dpois(x, lambda)
+	df <- data.frame(x=x, prob=prob, lambda=lambda)
+	return(df)
+}
+p.df <- mdply(data.frame(lambda=seq(10,60, 10)), pd)
+ggplot(p.df, aes(x, prob, group=lambda, color=factor(lambda)))+geom_point(shape=1)+geom_line()+facet_wrap(~lambda)+theme(legend.position="none")
+```
+
+## 正态分布
+正态分布是边续型分布，我们关心的不是某个值的概率，而是概率密度函数下的面积，它的概率密度函数是：
+$$ f(x) = \frac{1}{\sqrt{2\pi\sigma^2}} e^{-(x-\mu)^2/2\sigma^2}$$
+所有的正态分布，都可以标准化为均值为0，标准误为1的标准正态分布：
+$$ f(z) = \frac{1}{\sqrt{2\pi}} e^{-z^2/2}$$
+其中 $z=\frac{x-\mu}{\sigma}$ .
+
+## t分布
+如果总体是正态分布，那么样本均值的分布也呈正态，William S. Gosset发现了t分布，它在参数估计和统计检验上，比正态分布要好，在大样本上做的和正态分布一样好，而在小样本上，比正态分布好很多。
+
+```{r pd.fig3, width=6, height=6}
+require(plyr)
+x <- seq(-3, 3, length=100)
+pn <- dnorm(x)
+pn.df <- data.frame(x=x, prob=pn)
+
+get.pt <- function(x, df) {
+	prob <- dt(x, df=df)
+	dd <- data.frame(x=x, prob=prob, df=df)
+	return(dd)
+}
+para <- data.frame(x=rep(x, 4), df= rep(c(3, 5, 15, 30), each=length(x)))
+pt.df <- mdply(para, get.pt)
+require(ggplot2)
+ggplot(pt.df, aes(x, prob))+geom_line(aes(group=df, color=factor(df)))+geom_line(data=pn.df)
+```
+上图画了自由度为3，5，15和30的t分布，以及正态分布，随着自由度的增加，t分布越来越接近于正态分布，很多时候，我们只有小样本，那么可以说t分布是正态分布的保守版本.从图中可以观察到，t分布中心比较平，而尾巴比较”胖“，特别是自由度较小的时候，t分布的尾巴会比正态分布长，那么同样一个值，t分布计算出来的p-value会比正态分布大一点。
+```{r}
+dnorm(2)
+dt(2, df=5)
+```
+
+## 卡方分布
+k个独立的标准正态分布变量的平方和服从自由度为k的 $\chi^2$ 分布，卡方分布常用于假设检验和置信区间的计算。
+
+卡方分布被用于计算拟合优度，于观察到的分布和假设成立的分布之间；[估算总体标准偏差(population standard deviation)和样本标准偏差(sample standard deviation)的区间](confidence_interval.html)。
+
+```{r pd.fig4, width=6, height=6}
+pc <- function(x=50, df) {
+	x <- seq(0, x)
+	prob <- dchisq(x, df)
+	pc.df <- data.frame(x=x, prob=prob, df=df)
+	return(pc.df)
+}
+pc.df <- mdply(data.frame(df=c(3,6,9,18)), pc)
+ggplot(pc.df, aes(x, prob, group=df, color=factor(df)))+geom_point(shape=1)+geom_line()+ggtitle("Chi-Square Distribution")
+```
+## F分布
+F分布也是基于自由度，所以也是一个分布家族，它的自由度有两个，分别对应于分子项和分母项，因为F值是方差的比值，所以只有正值，函数峰在1左右（1代表两个方差是相等的），非对称分布，呈现右偏。
+
+```{r pd.fig5, width=6, height=6}
+pff <- function(x=seq(0,6,0.1), df1, df2) {
+	y <- df(x, df1, df2)
+	pf.df <- data.frame(x=x, prob=y, df1=df1, df2=df2)
+	return(pf.df)
+}
+
+pf.df <- mdply(data.frame(df1=c(3,4,10), df2=c(10, 15, 29)), pff)
+ggplot(pf.df, aes(x, prob, group=interaction(df1,df2), color=interaction(df1, df2)))+geom_line()+geom_vline(xintercept=1, linetype="dashed") + theme(legend.position=c(.8, .8))
+```
+如果F值小于1，使用左尾巴进行p值计算，大于1则右尾巴进行p值计算，很多人抛弃使用左尾巴进行p值计算，只需要把分子分母倒过来就行，当然自由度也要跟着倒过来。
+
+虽然使用单侧来计算，但p值的计算通常是two-tailed，因为F值是两个方差的比值，不管两个均值的差是正的还是负的，方差都是正的。从这个角度上看，计算出来的单侧p值要乘以2，要把正和负的均值差都考虑在内，这是双侧检验。
+假如F值为4.5，自由度为10和15，p值应该这样算：
+```{r}
+2*(1-pf(4.5, 10, 15))
+```
+
+
+
+
+
+
+```
+2013-06-20
+```
+
+## 欢迎请作者一杯咖啡
+<p><a href="https://me.alipay.com/gcyu"><img src="https://img.alipay.com/sys/personalprod/style/mc/btn-index.png" alt="捐赠EventProxy"></a></p>
+
+## 访问统计
+  <a href="http://www.digits.com" target="_blank">
+    <img src="http://counter.digits.com/?counter={1bb4e1b1-f35f-dd34-31dc-5a118f10bdb1}&template=simplehits&foreground=0B77CF&background=FFFFFF" 
+     alt="Hit Counter by Digits" border="0"  />
+  </a>

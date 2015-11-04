@@ -1,0 +1,59 @@
+# Advanced ANOVA
+
+## Repeated-Measures ANOVA
+ANOVA分析要求测量值是独立的，但是很多情况下，并不独立，比如对一个病人用药后不同时间段进行测量，同一个病人的测量值显然是相关的。
+这可以看成是成对T检验的扩展，可以应用于同一对象多个测量值的情况，所以称之为重复测量方差分析。
+
+假如我们有以下数据：
+```{r}
+data <- read.table("data/aov2.tsv", header=T)
+data
+```
+按照普通的方差分析
+```{r}
+summary(aov(Recall~Task*Valence, data=data))
+```
+如果这样来做，忽略了同一受试对象(subject)各个观察值之间的相关性这一信息，好比把成对T检验的成对信息给扔了一样。
+
+方差分析按照因素进行分组，误差均方即为组间均方，因为数据是独立，但上面的数据并不独立。这里如果只按照因素进行分组，而不考虑受试对象的信息，则把受试对象内部的方差也给归入误差方差，像上面这种重复测量的数据，受试对象内部的方差应该从误差方差中分离出来，归入真实方差。
+
+![重复测量ANOVA](figure/aov3.fig1.png)
+
+重复测量方差分析和其它方差分析的差别在于对方差的划分不同。
+
+```{r}
+summary(aov(Recall~Task*Valence+Error(Subject/(Task*Valence)), data=data))
+```
+
+把受试对象内部的方差从误差方差中分离出去，误差项变小了，F值变大，p值变小，检验的power大了很多。
+
+
+## Mixed-Factorial ANOVA
+
+```{r}
+md <- read.table("data/aov.mixed.tsv", header=T)
+head(md)
+tail(md)
+```
+上面这个数据，有18个对象，9个男性9个女性，每个对象被使用了三种可能剂量的药，然后被测试使用两种记忆类型（cued和free call），能否回忆起三种类型的词(positive, negative和neutral)，这里有2个对象间变量：性别和剂量，2个对象内剂量：Task（2个水平）和Valence（3个水平）。
+
+下面的命令，对 对象内因子、对象内误差项、对象间因子 进行方差分析。
+```{r}
+summary(aov(Recall~(Task*Valence*Gender*Dosage)+Error(Subject/(Task*Valence))+(Gender*Dosage),data=md))
+```
+多元回归的F值和ANOVA的F值是一样的，事实上两者的底层是general linear model，R在计算ANOVA时使用的是多元回归的特例。
+
+
+
+```
+2013-06-27
+```
+
+## 欢迎请作者一杯咖啡
+<p><a href="https://me.alipay.com/gcyu"><img src="https://img.alipay.com/sys/personalprod/style/mc/btn-index.png" alt="捐赠EventProxy"></a></p>
+
+## 访问统计
+  <a href="http://www.digits.com" target="_blank">
+    <img src="http://counter.digits.com/?counter={1bb4e1b1-f35f-dd34-31dc-5a118f10bdb1}&template=simplehits&foreground=0B77CF&background=FFFFFF" 
+     alt="Hit Counter by Digits" border="0"  />
+  </a>

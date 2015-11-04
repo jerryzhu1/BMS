@@ -1,0 +1,252 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8"/>
+
+<title>YGC的统计笔记</title>
+
+
+
+
+
+<style type="text/css">
+body, td {
+   font-family: sans-serif;
+   background-color: white;
+   font-size: 13px;
+}
+
+body {
+  max-width: 800px;
+  margin: auto;
+  padding: 1em;
+  line-height: 20px;
+}
+
+tt, code, pre {
+   font-family: 'DejaVu Sans Mono', 'Droid Sans Mono', 'Lucida Console', Consolas, Monaco, monospace;
+}
+
+h1 {
+   font-size:2.2em;
+}
+
+h2 {
+   font-size:1.8em;
+}
+
+h3 {
+   font-size:1.4em;
+}
+
+h4 {
+   font-size:1.0em;
+}
+
+h5 {
+   font-size:0.9em;
+}
+
+h6 {
+   font-size:0.8em;
+}
+
+a:visited {
+   color: rgb(50%, 0%, 50%);
+}
+
+pre, img {
+  max-width: 100%;
+}
+
+pre code {
+   display: block; padding: 0.5em;
+}
+
+code {
+  font-size: 92%;
+  border: 1px solid #ccc;
+}
+
+code[class] {
+  background-color: #F8F8F8;
+}
+
+table, td, th {
+  border: none;
+}
+
+blockquote {
+   color:#666666;
+   margin:0;
+   padding-left: 1em;
+   border-left: 0.5em #EEE solid;
+}
+
+hr {
+   height: 0px;
+   border-bottom: none;
+   border-top-width: thin;
+   border-top-style: dotted;
+   border-top-color: #999999;
+}
+
+@media print {
+   * {
+      background: transparent !important;
+      color: black !important;
+      filter:none !important;
+      -ms-filter: none !important;
+   }
+
+   body {
+      font-size:12pt;
+      max-width:100%;
+   }
+
+   a, a:visited {
+      text-decoration: underline;
+   }
+
+   hr {
+      visibility: hidden;
+      page-break-before: always;
+   }
+
+   pre, blockquote {
+      padding-right: 1em;
+      page-break-inside: avoid;
+   }
+
+   tr, img {
+      page-break-inside: avoid;
+   }
+
+   img {
+      max-width: 100% !important;
+   }
+
+   @page :left {
+      margin: 15mm 20mm 15mm 10mm;
+   }
+
+   @page :right {
+      margin: 15mm 10mm 15mm 20mm;
+   }
+
+   p, h2, h3 {
+      orphans: 3; widows: 3;
+   }
+
+   h2, h3 {
+      page-break-after: avoid;
+   }
+}
+</style>
+
+
+
+</head>
+
+<body>
+<h1>YGC的统计笔记</h1>
+
+<pre>
+  ____                              _                              __   __
+ / ___|_   _  __ _ _ __   __ _  ___| |__  _   _  __ _ _ __   __ _  \ \ / /   _
+| |  _| | | |/ _` | '_ \ / _` |/ __| '_ \| | | |/ _` | '_ \ / _` |  \ V / | | |
+| |_| | |_| | (_| | | | | (_| | (__| | | | |_| | (_| | | | | (_| |   | || |_| |
+ \____|\__,_|\__,_|_| |_|\__, |\___|_| |_|\__,_|\__,_|_| |_|\__, |   |_| \__,_|
+                         |___/                              |___/
+ ____  _        _   _     _             _   _       _
+/ ___|| |_ __ _| |_(_)___| |_ ___ ___  | \ | | ___ | |_ ___  ___
+\___ \| __/ _` | __| / __| __/ __/ __| |  \| |/ _ \| __/ _ \/ __|
+ ___) | || (_| | |_| \__ \ || (__\__ \ | |\  | (_) | ||  __/\__ \
+|____/ \__\__,_|\__|_|___/\__\___|___/ |_| \_|\___/ \__\___||___/
+
+</pre>
+
+<p>这是我个人的统计学笔记，从2013年初开始使用markdown写，本来是写给暨南大学功能蛋白研究中心的学生们看的，太多的学生连基本的统计检验都会搞错。
+2014年5月，我把之前的网页删了，笔记会陆续以博客文的形式再放出来，这样有一好处，如果读者发现有错漏或者有建议，可以在评论中反馈给我。</p>
+
+<p>现在只保留这个主页面，链接会陆续更新，并且我希望可以写出来更多的东西。</p>
+
+<pre><code>
+                                                     --余光创 于 香港大学 &amp; 暨南大学
+</code></pre>
+
+<pre><code>若想了解上帝在想什么，我们就必须学统计，因为统计学就是在量测他的旨意。
+
+                                                     ——南丁格尔
+</code></pre>
+
+<h2>杂文</h2>
+
+<ul>
+<li><a href="http://ygc.name/2011/06/24/five-things-biologists-should-know-about-statistics/">关于统计-生物学家需要知道的五件事</a></li>
+</ul>
+
+<h2>R语言</h2>
+
+<ul>
+<li><a href="http://ygc.name/tag/r/">统计计算语言R</a></li>
+<li><a href="http://ygc.name/2014/05/11/use-ggplot2/">使用ggplot2画图</a></li>
+</ul>
+
+<h2>统计检验</h2>
+
+<ul>
+<li><a href="probability_distributions.html">概率分布</a></li>
+<li><a href="confidence_interval.html">置信区间</a></li>
+<li><a href="pvalue.html">统计检验和P值</a></li>
+<li><a href="one_sample_t.test.html">单样本T检验</a></li>
+<li><a href="two_sample_t.test.html">两样本T检验</a></li>
+<li><a href="one_way_anova.html">单向方差分析</a></li>
+<li><a href="two_way_anova.html">双向方差分析</a></li>
+<li><a href="advanced_anova.html">高级方差分析</a></li>
+<li>多重检验</li>
+<li>卡方检验</li>
+<li>非参数检验</li>
+<li>Simulation &amp; Bootstrapping</li>
+</ul>
+
+<h2>回归分析</h2>
+
+<ul>
+<li><a href="correlation.html">相关性</a></li>
+<li><a href="simple_linear_regression.html">简单线性回归</a></li>
+<li><a href="multiple_linear_regression.html">多元线性回归</a></li>
+<li><a href="glm.html">通用线性模型</a></li>
+<li><a href="logistic.html">Logistic回归</a></li>
+</ul>
+
+<h2>聚类分析</h2>
+
+<ul>
+<li>层次聚类</li>
+<li>Kmeans</li>
+</ul>
+
+<h2>机器学习</h2>
+
+<ul>
+<li>支持向量机</li>
+</ul>
+
+<h2>生物实验统计分析</h2>
+
+<ul>
+<li><a href="RT_PCR.html">RT-PCR</a></li>
+<li><a href="http://ygc.name/2012/04/28/enrichment-analysis/">富集性分析</a></li>
+</ul>
+
+<h2>访问统计</h2>
+
+<p><a href="http://www.digits.com" target="_blank">
+    <img src="http://counter.digits.com/?counter={1bb4e1b1-f35f-dd34-31dc-5a118f10bdb1}&template=simplehits&foreground=0B77CF&background=FFFFFF" 
+     alt="Hit Counter by Digits" border="0"  />
+  </a></p>
+
+</body>
+
+</html>

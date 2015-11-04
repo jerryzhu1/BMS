@@ -1,0 +1,75 @@
+# 两样本T检验
+
+和[单样本T检验](one_sample_t.test.html)一样，前提条件是数据来自于正态分布，或者是样本量足够大，在这种情况下，两样本均值差的分布是呈现正态的，便可以应用T分布来计算[p值](pvalue.html)。
+
+在理解了正态分布、T分布以及p值的计算之后，我们应该很清楚，T检验就是通过计算t值来计算显著性：
+$$t = \frac{X-\mu}{SE}$$
+
+这里的X是我们的统计量，如单样本的 $\bar{x}$ ,而这里两样本，则为 $\bar{x_1}-\bar{x_2}$ ，而SE是统计量X的标准误，单样本T检验我们使用SEM来表示均值的标准误(standard error of the means)，相应的两样本T检验，我们使用SEDM来代表均值差的标准误（standard error of difference of means）。
+
+两样本t检验的通用形式为：
+$$ t = \frac{(x_1-x_2)-(\mu_1-\mu_2)}{SEDM}$$
+
+由于零假设是均值没有差别，所以 $\mu_1-\mu_2$ 会被假定为0.
+
+T检验的问题就在于如何计算SE，在这里要做两样本T检验，问题就成了如何计算SEDM。
+
+在[置信区间](confidence_interval.html)一节里，已经介绍了如何估计SEDM。
+
+## 成对T检验
+成对数据的 $SEDM = = \frac{s_d}{\sqrt{n}}$ 。
+成对T检验本质上和单样本T检验是一样的，通过计算 $d_i = x_{1i} -x_{2i}$ ，对d值进行单样本t检验。
+```{r}
+data(iris)
+attach(iris)
+t.test(Sepal.Length, Petal.Length, paired=TRUE)
+d = Sepal.Length - Petal.Length
+t.test(d)
+```
+
+## 方差相同的两样本T检验
+这种情况下 $SEDM = = \sqrt{\frac{s_p^2}{n_1}+\frac{s_p^2}{n_2}}$ , 自由度是 $n_1+n_2-2$ 。
+其中 $s_p^2$ 是合并方差： $s_p^2=\frac{(n_1-1)s_1^2+(n_2-1)s_2^2}{n_1+n_2-2}$
+
+很多教科书所说的两独立样本T检验就是指这种情况。记得以前老师讲过说T检验必须满足两个条件，一是正态，二是方差齐性，说的就是这个。
+
+当然T检验只需满足一个条件，那就是正态，方差不齐的情况下面会讲到。
+
+方差是否相同，可以计算两个样本的方差比值，方差相同，则比值应该在1左右，而方差不同，则比值会偏离1，这个比值称为F ratio，可以使用F检验来计算方差齐性的显著性。在方差齐性的前提条件下，我们使用上面的公式进行T检验。
+
+## 方差不同的两样本T检验
+如果F检验把方差齐性的零假设给reject了，那么就得用Welch t检验。
+$$SEDM = \sqrt{\frac{s_1^2}{n_1}+\frac{s_2^2}{n_2}}$$
+自由度通过Welch-Satterhwaite公式计算：
+$$ df = \frac{(s_1^2/n_1+s_2^2/n2)^2}{\frac{(s_1^2/n_1)^2}{n_1-1}+\frac{(s_2^2/n_2)^2}{n_2-1}}$$
+
+## 使用R进行T检验
+R的stats包提供了t.test函数，可以用于各种T检验，如果只提供一组数据，则进行单样本T检验，如果提供两组数据，则进行两样本T检验，主要的参数，无非是paired，TRUE则进行成对t检验，var.equal指定方差是否齐性，TRUE则进行经典方法，FALSE则进行Welch T检验。
+使用实例可参考[RT-PCR](http://ygc.name/stats/RT_PCR.html)一节。
+
+## 结论
+成对数据我们可以把成对的信息扔了，混在一起做两独立样本T检验，方差齐了，我们也可以把它当做不齐，用Welch方法。所以如果稀里糊涂的情况下，就用Welch T检验。
+
+如果是成对数据，当然还是成对T检验好，比如病人在使用某药物前后的指标，如果不用成对，则病人之间的variance也混进去，方差估计会大一些，T检验的power也会减弱。
+
+Welch T检验的自由度会比方差齐性的经典方法要小，根据[T分布](probability_distributions.html)，自由度越小，中心越平，而尾巴越长，也就是说，观察到同样一个t值，自由度小的分布计算出来的p值会更大，换句话说，自由度越小，T检验就越保守。
+
+
+这也是t.test函数默认使用Welch T test的原因，Welch T test较为保守，如果方差齐性，用经典方法可以检验出更小的差别。
+
+
+
+```
+2013-05-26
+```
+
+## 欢迎请作者一杯咖啡
+<p><a href="https://me.alipay.com/gcyu"><img src="https://img.alipay.com/sys/personalprod/style/mc/btn-index.png" alt="捐赠EventProxy"></a></p>
+
+## 访问统计
+  <a href="http://www.digits.com" target="_blank">
+    <img src="http://counter.digits.com/?counter={1bb4e1b1-f35f-dd34-31dc-5a118f10bdb1}&template=simplehits&foreground=0B77CF&background=FFFFFF" 
+     alt="Hit Counter by Digits" border="0"  />
+  </a>
+
+
